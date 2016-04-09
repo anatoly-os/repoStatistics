@@ -39,10 +39,6 @@ for logentry in logRoot.findall('logentry'):
    logentry[2] - paths, files
    logentry[3] - message
   """
-  filePath = logentry[2].text
-  if not filePath.endswith('.cpp') or not filePath.endswith('.h') or not filePath.endswith('.txt'):
-    continue
-
   revisionStr = logentry.get('revision')
   revisions.append(revisionStr)
   file.write('set outputDiff=%stat_path%/diffs/%repoFolderName%_{0}.log'.format(revisionStr) + '\n')
