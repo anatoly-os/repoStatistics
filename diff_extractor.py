@@ -15,7 +15,8 @@ if (len(sys.argv) > 2):
 tree = ET.parse(logPath)
 logRoot = tree.getroot()
 
-file = open('svn_diff_builder.bat', 'w+')
+diffBuilderFile = 'svn_diff_builder.bat'
+file = open(diffBuilderFile, 'w+')
 file.write('@echo off' + '\n')
 file.write('\n')
 file.write('SET repo_path="%RSSTAT_REPO_PATH%"' + '\n')
@@ -50,7 +51,7 @@ file.write('cd "%stat_path%"')
 file.close()
 
 import subprocess
-callArgs = ['svn_diff_extractor.bat']
+callArgs = [diffBuilderFile]
 if not suppressDiffBuilderCall:
   print('svn_diff_extractor.bat has been started')
   subprocess.call(callArgs)
