@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import sys
+import os
 
 logPath = ''
 if (len(sys.argv) > 1):
@@ -17,19 +18,17 @@ logRoot = tree.getroot()
 
 diffBuilderFile = 'svn_diff_builder.bat'
 file = open(diffBuilderFile, 'w+')
+
+repoPath = os.getenv('RSSTAT_REPO_PATH')
+repoPathLetter = repoPath[0:2]
+repoFolderName = os.path.basename(repoPath)
 file.write('@echo off' + '\n')
 file.write('\n')
-file.write('SET repo_path="%RSSTAT_REPO_PATH%"' + '\n')
-file.write('IF "%repo_path%" == "" (echo "repo is undefined"' + '\n')
-file.write('EXIT)' + '\n')
 file.write('SET stat_path=%~dp0' + '\n')
 file.write('\n')
 file.write('if not exist "%stat_path%/diffs" mkdir "%stat_path%/diffs"' + '\n')
-file.write('SET repoTemp=%repo_path%' + '\n')
-file.write('cd /d %repoTemp:~1,3%' + '\n')
-file.write('cd %repo_path%' + '\n')
-file.write('SET repoFolderSearcher=%repo_path%' + '\n')
-file.write('for %%f in (%repoFolderSearcher%) do SET repoFolderName=%%~nxf' + '\n')
+file.write('cd /d {0}'.format(repoPathLetter) + '\n')
+file.write('cd {0}'.format(repoPath) + '\n')
 file.write('\n')
 
 revisions = {}
@@ -42,8 +41,10 @@ for logentry in logRoot.findall('logentry'):
   """
   revisionStr = logentry.get('revision')
   revisions[int(revisionStr)] = logentry[0].text
-  file.write('set outputDiff=%stat_path%/diffs/%repoFolderName%_{0}.log'.format(revisionStr) + '\n')
-  file.write('svn diff -c {0} > %outputDiff%'.format(revisionStr) + '\n' + '\n')
+
+  if not os.path.isfile('./diffs/{0}_{1}.log'.format(repoFolderName, revisionStr)):
+    file.write('set outputDiff=%stat_path%/diffs/{0}_{1}.log'.format(repoFolderName, revisionStr) + '\n')
+    file.write('svn diff -c {0} > %outputDiff%'.format(revisionStr) + '\n' + '\n')
 
 file.write('SET statPathVal=%stat_path%' + '\n')
 file.write('cd /d %stat_path:~0,3%' + '\n')
