@@ -39,6 +39,7 @@ for logentry in logRoot.findall('logentry'):
   revisions[int(revisionStr)] = logentry[0].text
 
   if not os.path.isfile('./diffs/{0}_{1}.log'.format(repoFolderName, revisionStr)):
+    file.write('echo {0} revision diff in progress...'.format(revisionStr) + '\n')
     file.write('set outputDiff=%stat_path%/diffs/{0}_{1}.log'.format(repoFolderName, revisionStr) + '\n')
     file.write('svn diff -c {0} > %outputDiff%'.format(revisionStr) + '\n' + '\n')
 
@@ -53,23 +54,12 @@ print('{0} has been started'.format(diffBuilderFile))
 subprocess.call(callArgs)
 print('{0} has been finished'.format(diffBuilderFile))
 
-revisionsNumSorted = sorted(revisions)
-revsDiffMap = {}
+authorDataDict = {}
 sys.path.insert(0, './libs')
 from diffs_analyzer import analyze_diffs
 print('analyzing has been started')
-analyze_diffs(revisionsNumSorted, revsDiffMap)
+analyze_diffs(revisions, authorDataDict)
 print('analyzing has been finished')
-
-authorDataDict = {}
-for revision in revisionsNumSorted:
-  authorName = revisions[revision]
-  addedStringsNum = revsDiffMap[revision][0]
-  removedStringsNum = revsDiffMap[revision][1]
-  if not authorName in authorDataDict:
-    authorDataDict[authorName] = []
-
-  authorDataDict[authorName].append([revision, addedStringsNum, removedStringsNum])
 
 from statistics_html_builder import buildHtmlStatistics
 buildHtmlStatistics(authorDataDict)

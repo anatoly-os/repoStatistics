@@ -3,15 +3,15 @@ import os
 import os.path
 import re
 
-#revisions - list of strings with revision numbers
-def analyze_diffs(revisions, revsDiffMap):
+def analyze_diffs(revisionAuthorDict, authorDataDict):
   repoPath = os.getenv('RSSTAT_REPO_PATH')
   diffsPath = './diffs/'
   folderName = os.path.basename(repoPath)
   charsToRemoveToIdentifyNonEmptyString = ['{', '}', '/', '*', '(', ')', '[', ']', ';','\n','\r', '+', '-']
   rx = '[' + re.escape(''.join(charsToRemoveToIdentifyNonEmptyString)) + ']'
-  for revision in revisions:
-    file = open(diffsPath + '{0}_{1}.log'.format(folderName, revision))
+  revisionsNumSorted = sorted(revisionAuthorDict)
+  for revision in revisionsNumSorted:
+    file = open(diffsPath + '{0}_{1}.log'.format(folderName, str(revision)))
     filesSeparator = '==================================================================='
     from collections import defaultdict
     revisionDiffByFiles = defaultdict(list)
@@ -69,4 +69,8 @@ def analyze_diffs(revisions, revsDiffMap):
           elif firstChar == '-':
             removedLines += 1
 
-    revsDiffMap[int(revision)] = [addedLines, removedLines]
+    authorName = revisionAuthorDict[revision]
+    if not authorName in authorDataDict:
+      authorDataDict[authorName] = []
+
+    authorDataDict[authorName].append([revision, addedLines, removedLines])
