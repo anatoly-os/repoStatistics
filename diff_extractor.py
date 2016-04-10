@@ -32,7 +32,7 @@ file.write('SET repoFolderSearcher=%repo_path%' + '\n')
 file.write('for %%f in (%repoFolderSearcher%) do SET repoFolderName=%%~nxf' + '\n')
 file.write('\n')
 
-revisions = []
+revisions = {}
 for logentry in logRoot.findall('logentry'):
   """
    logentry[0] - author
@@ -41,7 +41,7 @@ for logentry in logRoot.findall('logentry'):
    logentry[3] - message
   """
   revisionStr = logentry.get('revision')
-  revisions.append(revisionStr)
+  revisions[int(revisionStr)] = logentry[0].text
   file.write('set outputDiff=%stat_path%/diffs/%repoFolderName%_{0}.log'.format(revisionStr) + '\n')
   file.write('svn diff -c {0} > %outputDiff%'.format(revisionStr) + '\n' + '\n')
 
@@ -57,14 +57,14 @@ if not suppressDiffBuilderCall:
   subprocess.call(callArgs)
   print('svn_diff_extractor.bat has been finished')
 
-revisions = sorted(revisions)
+revisionsNumSorted = sorted(revisions)
 revsDiffMap = {}
 from diffs_analyzer import analyze_diffs
-analyze_diffs(revisions, revsDiffMap)
+analyze_diffs(revisionsNumSorted, revsDiffMap)
 
 outputResults = open('a.log', 'w+')
-for revision in revisions:
-  outputResults.write('Revision: {0: <5}   Added: {1: <5}   Removed: {2: <5}'.format(revision, revsDiffMap[int(revision)][0], revsDiffMap[int(revision)][1]))
+for revision in revisionsNumSorted:
+  outputResults.write('Revision: {0: <5}   Author: {1: <10}   Added: {2: <5}   Removed: {3: <5}'.format(revision, revisions[revision], revsDiffMap[int(revision)][0], revsDiffMap[int(revision)][1]))
   outputResults.write('\n')
 
 
