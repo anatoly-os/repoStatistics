@@ -9,10 +9,6 @@ else:
   print('Specify path to the log file as the 1st argument')
   sys.exit()
 
-suppressDiffBuilderCall = False
-if (len(sys.argv) > 2):
-  suppressDiffBuilderCall = True
-
 tree = ET.parse(logPath)
 logRoot = tree.getroot()
 
@@ -53,32 +49,26 @@ file.close()
 
 import subprocess
 callArgs = [diffBuilderFile]
-if not suppressDiffBuilderCall:
-  print('svn_diff_extractor.bat has been started')
-  subprocess.call(callArgs)
-  print('svn_diff_extractor.bat has been finished')
+print('{0} has been started'.format(diffBuilderFile))
+subprocess.call(callArgs)
+print('{0} has been finished'.format(diffBuilderFile))
 
 revisionsNumSorted = sorted(revisions)
 revsDiffMap = {}
 from diffs_analyzer import analyze_diffs
+print('analyzing has been started')
 analyze_diffs(revisionsNumSorted, revsDiffMap)
+print('analyzing has been finished')
 
-outputResults = open('a.log', 'w+')
+authorDataDict = {}
 for revision in revisionsNumSorted:
-  outputResults.write('Revision: {0: <5}   Author: {1: <10}   Added: {2: <5}   Removed: {3: <5}'.format(revision, revisions[revision], revsDiffMap[int(revision)][0], revsDiffMap[int(revision)][1]))
-  outputResults.write('\n')
+  authorName = revisions[revision]
+  addedStringsNum = revsDiffMap[revision][0]
+  removedStringsNum = revsDiffMap[revision][1]
+  if not authorName in authorDataDict:
+    authorDataDict[authorName] = []
 
+  authorDataDict[authorName].append([revision, addedStringsNum, removedStringsNum])
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+from statistics_html_builder import buildHtmlStatistics
+buildHtmlStatistics(authorDataDict)
