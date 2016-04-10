@@ -55,6 +55,7 @@ print('{0} has been finished'.format(diffBuilderFile))
 
 revisionsNumSorted = sorted(revisions)
 revsDiffMap = {}
+sys.path.insert(0, './libs')
 from diffs_analyzer import analyze_diffs
 print('analyzing has been started')
 analyze_diffs(revisionsNumSorted, revsDiffMap)
