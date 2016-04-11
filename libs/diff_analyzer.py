@@ -3,6 +3,10 @@ import os
 import os.path
 import re
 
+repoPath = os.getenv('RSSTAT_REPO_PATH')
+diffsPath = './diffs/'
+bannedDiffsPath = './diffs/bannedDiffs/'
+diffLogMask = '{0}_{1}.log'
 def linesCounter(linesByFiles):
   charsToRemoveToIdentifyNonEmptyString = ['{', '}', '/', '*', '(', ')', '[', ']', ';','\n','\r', '+', '-']
   rx = '[' + re.escape(''.join(charsToRemoveToIdentifyNonEmptyString)) + ']'
@@ -33,12 +37,14 @@ def linesCounter(linesByFiles):
   return addedLines, removedLines
 
 def analyze_diffs(revisionAuthorDict, authorDataDict):
-  repoPath = os.getenv('RSSTAT_REPO_PATH')
-  diffsPath = './diffs/'
   folderName = os.path.basename(repoPath)
   revisionsNumSorted = sorted(revisionAuthorDict)
   for revision in revisionsNumSorted:
-    file = open(diffsPath + '{0}_{1}.log'.format(folderName, str(revision)))
+    if os.path.exists(diffsPath + diffLogMask.format(folderName, str(revision))):
+      file = open(diffsPath + diffLogMask.format(folderName, str(revision)))
+    else:
+      continue
+
     filesSeparator = '==================================================================='
     from collections import defaultdict
     revisionDiffByFiles = defaultdict(list)

@@ -15,14 +15,17 @@ logRoot = tree.getroot()
 diffBuilderFile = 'svn_diff_builder.bat'
 file = open(diffBuilderFile, 'w+')
 
-repoPath = os.getenv('RSSTAT_REPO_PATH')
+
+sys.path.insert(0, './libs/')
+from diff_analyzer import repoPath
+from diff_analyzer import diffsPath
 repoPathLetter = repoPath[0:2]
 repoFolderName = os.path.basename(repoPath)
 file.write('@echo off' + '\n')
 file.write('\n')
 file.write('SET stat_path=%~dp0' + '\n')
 file.write('\n')
-file.write('if not exist "%stat_path%/diffs" mkdir "%stat_path%/diffs"' + '\n')
+file.write('if not exist "%stat_path%{0}" mkdir "%stat_path%{0}"'.format(diffsPath[1:-1]) + '\n')
 file.write('cd /d {0}'.format(repoPathLetter) + '\n')
 file.write('cd {0}'.format(repoPath) + '\n')
 file.write('\n')
@@ -38,9 +41,11 @@ for logentry in logRoot.findall('logentry'):
   revisionStr = logentry.get('revision')
   revisions[int(revisionStr)] = logentry[0].text
 
-  if not os.path.isfile('./diffs/{0}_{1}.log'.format(repoFolderName, revisionStr)):
+  from diff_analyzer import bannedDiffsPath
+  if not (os.path.isfile('{0}{1}_{2}.log'.format(diffsPath, repoFolderName, revisionStr)) or
+          os.path.isfile('{0}{1}_{2}.log'.format(bannedDiffsPath, repoFolderName, revisionStr)) ):
     file.write('echo {0} revision diff in progress...'.format(revisionStr) + '\n')
-    file.write('set outputDiff=%stat_path%/diffs/{0}_{1}.log'.format(repoFolderName, revisionStr) + '\n')
+    file.write('set outputDiff=%stat_path%{0}{1}_{2}.log'.format(diffsPath[1:-1], repoFolderName, revisionStr) + '\n')
     file.write('svn diff -c {0} > %outputDiff%'.format(revisionStr) + '\n' + '\n')
 
 file.write('SET statPathVal=%stat_path%' + '\n')
@@ -48,18 +53,30 @@ file.write('cd /d %stat_path:~0,3%' + '\n')
 file.write('cd "%stat_path%"')
 file.close()
 
+runDiffConstructor = True
+if (len(sys.argv) > 2):
+  runDiffConstructor = False
+
 import subprocess
-callArgs = [diffBuilderFile]
-print('{0} has been started'.format(diffBuilderFile))
-subprocess.call(callArgs)
-print('{0} has been finished'.format(diffBuilderFile))
+if runDiffConstructor:
+  callArgs = [diffBuilderFile]
+  print('{0} has been started'.format(diffBuilderFile))
+  subprocess.call(callArgs)
+  print('{0} has been finished'.format(diffBuilderFile))
 
 authorDataDict = {}
-sys.path.insert(0, './libs')
-from diffs_analyzer import analyze_diffs
+from diff_analyzer import analyze_diffs
 print('analyzing has been started')
 analyze_diffs(revisions, authorDataDict)
 print('analyzing has been finished')
+
+suspeciousFiles = open('suspicious_revisions.log', 'w+')
+suspeciousFiles.write('------------- >1000 lines revisions -------------' + '\n')
+for author in authorDataDict:
+  for item in authorDataDict[author]:
+    totalStringsChanged = item[1] + item[2]
+    if totalStringsChanged > 1000:
+      suspeciousFiles.write('Revision: {0: <5}   Strings Changed: {1: <5}'.format(item[0], totalStringsChanged) + '\n')
 
 from statistics_html_builder import buildHtmlStatistics
 buildHtmlStatistics(authorDataDict)
