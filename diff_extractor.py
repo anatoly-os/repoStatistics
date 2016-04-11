@@ -70,13 +70,9 @@ print('analyzing has been started')
 analyze_diffs(revisions, authorDataDict)
 print('analyzing has been finished')
 
-suspeciousFiles = open('suspicious_revisions.log', 'w+')
-suspeciousFiles.write('------------- >1000 lines revisions -------------' + '\n')
-for author in authorDataDict:
-  for item in authorDataDict[author]:
-    totalStringsChanged = item[1] + item[2]
-    if totalStringsChanged > 1000:
-      suspeciousFiles.write('Revision: {0: <5}   Strings Changed: {1: <5}'.format(item[0], totalStringsChanged) + '\n')
+from suspicious_revisions_extractor import extractSuspiciousRevision
+print('extracting suspicious revisions...')
+extractSuspiciousRevision(logPath, authorDataDict)
 
 from statistics_html_builder import buildHtmlStatistics
 buildHtmlStatistics(authorDataDict)

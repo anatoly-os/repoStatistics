@@ -7,6 +7,7 @@ repoPath = os.getenv('RSSTAT_REPO_PATH')
 diffsPath = './diffs/'
 bannedDiffsPath = './diffs/bannedDiffs/'
 diffLogMask = '{0}_{1}.log'
+suspiciousRevisionsFile = 'suspicious_revisions.log'
 def linesCounter(linesByFiles):
   charsToRemoveToIdentifyNonEmptyString = ['{', '}', '/', '*', '(', ')', '[', ']', ';','\n','\r', '+', '-']
   rx = '[' + re.escape(''.join(charsToRemoveToIdentifyNonEmptyString)) + ']'
