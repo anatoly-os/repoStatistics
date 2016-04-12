@@ -35,14 +35,12 @@ def extractSuspiciousRevision(logFile, authorDataDict):
   suspeciousFiles.write('------------- "Reverted", "Renamed" revisions -------------' + '\n')
 
   suspiciousRevs = sorted(suspiciousRevisions)
-  counter = 0
   for rev in suspiciousRevs:
-    counter += 1
-    suspeciousFiles.write('{0: >3}) Revision: {1: >5}   '.format(counter, rev) + '{0: >10}'.format(suspiciousRevisions[rev]) + '\n')
+    suspeciousFiles.write('{0: >5} - Revision     '.format(rev) + '{0: >10}'.format(suspiciousRevisions[rev]) + '\n')
 
   suspeciousFiles.write('------------- >1000 lines revisions -------------' + '\n')
   for author in authorDataDict:
     for item in authorDataDict[author]:
       totalStringsChanged = item[1] + item[2]
       if totalStringsChanged > 1000:
-        suspeciousFiles.write('Revision: {0: <5}   Strings Changed: {1: <5}'.format(item[0], totalStringsChanged) + '\n')
+        suspeciousFiles.write('{0: <5} - Revision     Strings Changed Total: {1: <5}'.format(item[0], totalStringsChanged) + '\n')
