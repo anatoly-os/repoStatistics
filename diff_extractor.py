@@ -25,7 +25,7 @@ file.write('@echo off' + '\n')
 file.write('\n')
 file.write('SET stat_path=%~dp0' + '\n')
 file.write('\n')
-file.write('if not exist "%stat_path%{0}" mkdir "%stat_path%{0}"'.format(diffsPath[1:-1]) + '\n')
+file.write('if not exist "%stat_path%/{0}" mkdir "%stat_path%/{0}"'.format(diffsPath[1:-1]) + '\n')
 file.write('cd /d {0}'.format(repoPathLetter) + '\n')
 file.write('cd {0}'.format(repoPath) + '\n')
 file.write('\n')
@@ -42,10 +42,10 @@ for logentry in logRoot.findall('logentry'):
   revisions[int(revisionStr)] = logentry[0].text
 
   from diff_analyzer import bannedDiffsPath
-  if not (os.path.isfile('{0}{1}_{2}.log'.format(diffsPath, repoFolderName, revisionStr)) or
-          os.path.isfile('{0}{1}_{2}.log'.format(bannedDiffsPath, repoFolderName, revisionStr)) ):
+  if not (os.path.isfile('{0}/{1}_{2}.log'.format(diffsPath, repoFolderName, revisionStr)) or
+          os.path.isfile('{0}/{1}_{2}.log'.format(bannedDiffsPath, repoFolderName, revisionStr)) ):
     file.write('echo {0} revision diff in progress...'.format(revisionStr) + '\n')
-    file.write('set outputDiff=%stat_path%{0}{1}_{2}.log'.format(diffsPath[1:-1], repoFolderName, revisionStr) + '\n')
+    file.write('set outputDiff=%stat_path%{0}/{1}_{2}.log'.format(diffsPath[1:-1], repoFolderName, revisionStr) + '\n')
     file.write('svn diff -c {0} > %outputDiff%'.format(revisionStr) + '\n' + '\n')
 
 file.write('SET statPathVal=%stat_path%' + '\n')
